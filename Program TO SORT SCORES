@@ -1,0 +1,226 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <iomanip>
+#include <vector>
+using namespace std;
+
+// Structure to hold student information
+struct stdRecord {
+    string firstName;
+    string lastName;
+    double score;
+};
+
+// Function to sort student records by score using bubble sort
+void sortByScore(stdRecord myArray[], int numOfRecords) {
+    for (int i = 0; i < numOfRecords - 1; i++) {
+        for (int j = 0; j < numOfRecords - i - 1; j++) {
+            if (myArray[j].score > myArray[j + 1].score) {
+                stdRecord temp = myArray[j];
+                myArray[j] = myArray[j + 1];
+                myArray[j + 1] = temp;
+            }
+        }
+    }
+}
+
+// Function to sort student records by name using bubble sort
+void sortByName(stdRecord myArray[], int numOfRecords) {
+    for (int i = 0; i < numOfRecords - 1; i++) {
+        for (int j = 0; j < numOfRecords - i - 1; j++) {
+            if (myArray[j].lastName > myArray[j + 1].lastName ||
+                (myArray[j].lastName == myArray[j + 1].lastName &&
+                    myArray[j].firstName > myArray[j + 1].firstName)) {
+                stdRecord temp = myArray[j];
+                myArray[j] = myArray[j + 1];
+                myArray[j + 1] = temp;
+            }
+        }
+    }
+}
+
+int main() {
+    stdRecord myStdRecords[100]; // Array to hold student records
+    int numStudents = 0; // Number of students initialized to 0
+    char option; // Variable to hold menu option
+
+    do {
+        // Display menu options
+        cout << "The menu shown below contains eight options." << endl;
+        cout << "(1) K: The option will allow the user to enter student's scores." << endl;
+        cout << "(2) W: The option will allow the user to save/store student's scores entered in a file." << endl;
+        cout << "(3) R: The option will read student's scores from a file." << endl;
+        cout << "(4) D: The option will display the current number of students, their scores, and some statistics." << endl;
+        cout << "(5) M: The option will allow the user to modify a score." << endl;
+        cout << "(6) B: The option will sort student's records using bubble sort by scores." << endl;
+        cout << "(7) N: The option will sort student's records using bubble sort by names." << endl;
+        cout << "(8) Q: The option will allow the user to terminate the program." << endl;
+        cout << "Please select an option shown above: ";
+        cin >> option;
+
+        switch (option) {
+        case 'K': {
+            // Input number of students
+            cout << "Please enter the number of students between 1 and 100, inclusive: ";
+            cin >> numStudents;
+            if (numStudents < 1 || numStudents > 100) {
+                cout << "Invalid number of students. Please try again." << endl;
+                numStudents = 0; // Reset if invalid
+                break;
+            }
+            // Input student details
+            for (int i = 0; i < numStudents; i++) {
+                cout << "Please enter the first name of student " << (i + 1) << ": ";
+                cin >> myStdRecords[i].firstName;
+                cout << "Please enter the last name of student " << (i + 1) << ": ";
+                cin >> myStdRecords[i].lastName;
+                cout << "Please enter the score for student " << (i + 1) << ": ";
+                cin >> myStdRecords[i].score;
+            }
+            break;
+        }
+        case 'W': {
+            // Write student records to a file
+            string fileName;
+            cout << "Please enter the file name (up to 20 characters without space in it): ";
+            cin >> fileName;
+            ofstream outFile(fileName);
+            outFile << numStudents << endl;
+            for (int i = 0; i < numStudents; i++) {
+                outFile << myStdRecords[i].firstName << endl;
+                outFile << myStdRecords[i].lastName << endl;
+                outFile << myStdRecords[i].score << endl;
+            }
+            outFile.close();
+            cout << "Information saved in the file named " << fileName << endl;
+            break;
+        }
+        case 'R': {
+            // Read student records from a file
+            string fileName;
+            cout << "Please enter the file name (up to 20 characters without space in it): ";
+            cin >> fileName;
+            ifstream inFile(fileName);
+            if (!inFile) {
+                cout << "Error opening file." << endl;
+                break;
+            }
+            inFile >> numStudents;
+            for (int i = 0; i < numStudents; i++) {
+                inFile >> myStdRecords[i].firstName;
+                inFile >> myStdRecords[i].lastName;
+                inFile >> myStdRecords[i].score;
+            }
+            inFile.close();
+            cout << "Data read successfully from " << fileName << endl;
+            break;
+        }
+        case 'D': {
+            // Display student records and statistics
+            cout << "There are currently " << numStudents << " students." << endl;
+            double totalScore = 0;
+            double highestScore = myStdRecords[0].score;
+            double lowestScore = myStdRecords[0].score;
+            vector<int> highestStudents;
+            vector<int> lowestStudents;
+
+            for (int i = 0; i < numStudents; i++) {
+                cout << "Student " << (i + 1) << " is " << myStdRecords[i].firstName << " "
+                    << myStdRecords[i].lastName << " with a score of " << myStdRecords[i].score << "." << endl;
+                totalScore += myStdRecords[i].score;
+                if (myStdRecords[i].score > highestScore) {
+                    highestScore = myStdRecords[i].score;
+                    highestStudents.clear();
+                    highestStudents.push_back(i);
+                }
+                else if (myStdRecords[i].score == highestScore) {
+                    highestStudents.push_back(i);
+                }
+                if (myStdRecords[i].score < lowestScore) {
+                    lowestScore = myStdRecords[i].score;
+                    lowestStudents.clear();
+                    lowestStudents.push_back(i);
+                }
+                else if (myStdRecords[i].score == lowestScore) {
+                    lowestStudents.push_back(i);
+                }
+            }
+
+            double averageScore = totalScore / numStudents;
+            cout << fixed << setprecision(2);
+            cout << "The average of the " << numStudents << " scores is " << averageScore << "." << endl;
+            cout << "The students with the highest score are: ";
+            for (size_t i = 0; i < highestStudents.size(); i++) {
+                cout << myStdRecords[highestStudents[i]].firstName << " "
+                    << myStdRecords[highestStudents[i]].lastName;
+                if (i < highestStudents.size() - 1) cout << ", ";
+            }
+            cout << "." << endl;
+            cout << "The students with the lowest score are: ";
+            for (size_t i = 0; i < lowestStudents.size(); i++) {
+                cout << myStdRecords[lowestStudents[i]].firstName << " "
+                    << myStdRecords[lowestStudents[i]].lastName;
+                if (i < lowestStudents.size() - 1) cout << ", ";
+            }
+            cout << "." << endl;
+            break;
+        }
+        case 'M': {
+            // Modify a student's record
+            int index;
+            cout << "Please enter an index for the student (between 0 and " << (numStudents - 1) << ", inclusive): ";
+            cin >> index;
+            if (index < 0 || index >= numStudents) {
+                cout << "Invalid index." << endl;
+                break;
+            }
+            cout << "Please enter the new first name for the student: ";
+            cin >> myStdRecords[index].firstName;
+            cout << "Please enter the new last name for the student: ";
+            cin >> myStdRecords[index].lastName;
+            cout << "Please enter the new score for the student: ";
+            cin >> myStdRecords[index].score;
+            break;
+        }
+        case 'B': {
+            // Sort student records by score
+            sortByScore(myStdRecords, numStudents);
+            cout << "Records sorted by scores." << endl;
+            break;
+        }
+        case 'N': {
+            // Sort student records by name
+            sortByName(myStdRecords, numStudents);
+            cout << "Records sorted by names." << endl;
+            break;
+        }
+        case 'Q': {
+            // Quit the program
+            char saveOption;
+            cout << "Do you want to save/store all the information in a file (Y/N)? ";
+            cin >> saveOption;
+            if (saveOption == 'Y') {
+                string fileName;
+                cout << "Please enter the file name (up to 20 characters without space in it): ";
+                cin >> fileName;
+                ofstream outFile(fileName);
+                outFile << numStudents << endl;
+                for (int i = 0; i < numStudents; i++) {
+                    outFile << myStdRecords[i].firstName << endl;
+                    outFile << myStdRecords[i].lastName << endl;
+                    outFile << myStdRecords[i].score << endl;
+                }
+                outFile.close();
+                cout << "Information saved in the file named " << fileName << endl;
+            }
+            cout << "Thank you for using the program. See you again soon!" << endl;
+            break;
+        }
+        default:
+            cout << "Invalid option. Please try again." << endl;
+        }
+    } while (option != 'Q');
+
+    return 0;
+}
